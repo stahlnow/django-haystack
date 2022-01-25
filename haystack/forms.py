@@ -1,5 +1,5 @@
 from django import forms
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.utils.text import capfirst
 from django.utils.translation import gettext_lazy as _
 
@@ -12,7 +12,7 @@ from haystack.utils.app_loading import haystack_get_model
 
 def model_choices(using=DEFAULT_ALIAS):
     choices = [
-        (get_model_ct(m), capfirst(smart_text(m._meta.verbose_name_plural)))
+        (get_model_ct(m), capfirst(smart_str(m._meta.verbose_name_plural)))
         for m in connections[using].get_unified_index().get_indexed_models()
     ]
     return sorted(choices, key=lambda x: x[1])
@@ -129,7 +129,10 @@ class FacetedModelSearchForm(ModelSearchForm):
     def search(self):
         sqs = super().search()
 
-        if hasattr(self, "cleaned_data") and self.cleaned_data["selected_facets"]:
+        if (
+            hasattr(self, "cleaned_data")
+            and self.cleaned_data["selected_facets"]
+        ):
             sqs = sqs.narrow(self.cleaned_data["selected_facets"])
 
         return sqs.models(*self.get_models())
